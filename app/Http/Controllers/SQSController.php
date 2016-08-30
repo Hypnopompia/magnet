@@ -29,9 +29,13 @@ class SQSController extends Controller
 	}
 
 	public function addjobs(Request $request) {
-		// $workerjob = new Workerjob;
-		// $workerjob->addJob('InvitationReminders', []);
-		// $workerjob->send();
+		$workerjob = new Workerjob;
+
+		foreach (User::all() as $user) {
+			$workerjob->addJob('ImportBoards', ['user_id' => $user->id]);
+		}
+
+		$workerjob->send();
 
 		return response()->json(['ok' => true]);
 	}

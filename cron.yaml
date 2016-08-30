@@ -2,4 +2,4 @@ version: 1
 cron:
   - name: "add-jobs"
     url: "/sqs.addjobs"
-    schedule: "0 * * * *"
+    schedule: "0 0 * * *"

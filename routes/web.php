@@ -19,6 +19,7 @@ Auth::routes();
 
 Route::get('/pinterest/callback', 'PinterestController@callback');
 
-Route::group(['middleware' => 'web'], function () {
-	Route::get('/home', 'HomeController@index');
-});
+Route::get('/home', 'HomeController@index');
+Route::get('/board/{board}', 'HomeController@board');
+
+Route::post('/refreshboards', 'HomeController@refreshboards');

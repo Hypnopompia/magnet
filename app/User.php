@@ -44,6 +44,25 @@ class User extends Authenticatable
         return false;
     }
 
+    public function reset() {
+        Board::where('user_id', $this->id)->delete();
+        Pin::where('user_id', $this->id)->delete();
+
+        $this->pinterestaccesstoken = null;
+        $this->save();
+
+        return $this;
+    }
+
+    public function printBoards() {
+        $pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
+        $pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
+
+        $page = [];
+        $boards = $pinterest->users->getMeBoards( array_merge($page, ['fields' => 'id,name,url,description,creator,created_at,counts,image']) );
+        dd($boards);
+    }
+
     public static function importBoardsJob($jobData) {
         $user = User::find($jobData['user_id']);
         if (!$user) {
@@ -62,19 +81,31 @@ class User extends Authenticatable
         $page = [];
 
         do {
-            $boards = $pinterest->users->getMeBoards($page);
+            $boards = $pinterest->users->getMeBoards( array_merge($page, ['fields' => 'id,name,url,description,creator,created_at,counts,image']) );
 
             foreach ($boards as $b) {
+                $newBoard = [
+                    'user_id' => $user->id,
+                    'pinterestid' => $b->id,
+                    'name' => $b->name,
+                    'description' => $b->description,
+                ];
 
-                $board = Board::unguarded(function() use ($user, $b) {
-                    return Board::firstOrCreate([
-                        'user_id' => $user->id,
-                        'pinterestid' => $b->id,
-                        'name' => $b->name,
-                    ]);
+                if (isset($b->image['60x60']['url'])) {
+                    $newBoard['imageurl'] = $b->image['60x60']['url'];
+                }
+
+                if (isset($b->image['60x60']['width'])) {
+                    $newBoard['imagewidth'] = $b->image['60x60']['width'];
+                }
+
+                if (isset($b->image['60x60']['height'])) {
+                    $newBoard['imageheight'] = $b->image['60x60']['height'];
+                }
+
+                $board = Board::unguarded(function() use ($newBoard) {
+                    return Board::firstOrCreate($newBoard);
                 });
-
-                // $this->importPins($board);
 
                 $workerjob->addJob('ImportPins', ['user_id' => $user->id, 'board_id' => $board->id]);
             }
@@ -83,14 +114,6 @@ class User extends Authenticatable
         } while ($page);
 
         $workerjob->send();
-    }
-
-    public function reset() {
-        Board::where('user_id', $this->id)->delete();
-        Pin::where('user_id', $this->id)->delete();
-
-        $this->pinterestaccesstoken = null;
-        $this->save();
     }
 
     public static function importPinsJob($jobData) {

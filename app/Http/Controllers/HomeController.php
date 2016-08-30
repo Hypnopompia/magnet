@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Board;
+use App\Magnet\Workerjob;
+use App\User;
 use Auth;
 use DirkGroenen\Pinterest\Pinterest;
 use Illuminate\Http\Request;
@@ -24,14 +26,13 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index() {
         $pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
         $loginurl = $pinterest->auth->getLoginUrl("https://magnet.havocstudios.com/pinterest/callback", ['read_public']);
 
         $user = Auth::user();
 
-        $boards = Board::where('user_id', $user->id)->with('pins')->get();
+        $boards = Board::where('user_id', $user->id)->get();
 
         return view('home', [
             'pinterestLoggedIn' => $user->pinterestLoggedIn(),
@@ -40,5 +41,24 @@ class HomeController extends Controller
         ]);
 
 
+    }
+
+    public function board(Board $board) {
+        $user = Auth::user();
+        $board->load('pins');
+
+        return view('board', [
+            'board' => $board,
+        ]);
+
+
+    }
+
+    public function refreshboards(Request $request) {
+        $workerjob = new Workerjob;
+        $workerjob->addJob('ImportBoards', ['user_id' => Auth::user()->id]);
+        $workerjob->send();
+
+        return redirect("home");
     }
 }

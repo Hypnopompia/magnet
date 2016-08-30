@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Dashboard</div>
+                <div class="panel-heading">Boards</div>
 
                 <div class="panel-body">
                     @if(!$pinterestLoggedIn)
@@ -13,21 +13,15 @@
                     @endif
 
                     @if($pinterestLoggedIn)
-                        @foreach ($boards as $board)
-                            {{ $board->name }}
+                    <div id="boards">
+                    @foreach ($boards as $board)
+                        <div class="board">
+                            <a href="{{ url('/board', [$board->id]) }}"><img src="{{ $board->imageurl }}" /></a>
+                            <a href="{{ url('/board', [$board->id]) }}">{{ $board->name }}</a>
+                        </div>
+                    @endforeach
+                    </div>
 
-                            <div id="wrapper">
-                                <div id="columns">
-                                @foreach ($board->pins as $pin)
-                                    <div class="pin">
-                                        <img src="{{ $pin->imageurl }}" />
-                                        <p>{{ $pin->note }}</p>
-                                    </div>
-                                @endforeach
-                                </div>
-                            </div>
-
-                        @endforeach
                     @endif
                 </div>
             </div>

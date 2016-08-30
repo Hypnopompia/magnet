@@ -12,80 +12,23 @@
 
     <!-- Styles -->
     <link href="/css/app.css" rel="stylesheet">
-
     <style type="text/css">
-        #wrapper {
-            width: 90%;
-            max-width: 800px;
-            min-width: 800px;
-            margin: 50px auto;
+        .card {
+            border-radius: 3px;
+            -webkit-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
+            -moz-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
+            box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
         }
 
-        #columns {
-            -webkit-column-count: 3;
-            -webkit-column-gap: 10px;
-            -webkit-column-fill: auto;
-            -moz-column-count: 3;
-            -moz-column-gap: 10px;
-            -moz-column-fill: auto;
-            column-count: 3;
-            column-gap: 15px;
-            column-fill: auto;
+        #boards .board {
+            margin-bottom: 10px;
         }
 
-        .pin {
-            display: inline-block;
-            background: #FEFEFE;
-            border: 2px solid #FAFAFA;
-            box-shadow: 0 1px 2px rgba(34, 25, 25, 0.4);
-            margin: 0 0px 15px;
-            -webkit-column-break-inside: avoid;
-            -moz-column-break-inside: avoid;
-            column-break-inside: avoid;
-            padding: 0px;
-            padding-bottom: 5px;
-            background: -webkit-linear-gradient(45deg, #FFF, #F9F9F9);
-            opacity: 1;
-
-            -webkit-transition: all .2s ease;
-            -moz-transition: all .2s ease;
-            -o-transition: all .2s ease;
-            transition: all .2s ease;
-        }
-
-        .pin img {
-            width: 100%;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 15px;
-            margin-bottom: 5px;
-        }
-
-        .pin p {
-            font: 12px/18px Arial, sans-serif;
-            color: #333;
-            margin: 5px;
-        }
-
-        @media (min-width: 960px) {
-            #columns {
-                -webkit-column-count: 4;
-                -moz-column-count: 4;
-                column-count: 4;
-            }
-        }
-
-        @media (min-width: 1100px) {
-            #columns {
-                -webkit-column-count: 5;
-                -moz-column-count: 5;
-                column-count: 5;
-            }
-        }
-
-        #columns:hover .pin:not(:hover) {
-            opacity: 0.4;
+        #cards .card p {
+            margin: 10px;
         }
     </style>
+
 
     <!-- Scripts -->
     <script>
@@ -100,17 +43,24 @@
             <div class="navbar-header">
 
                 <!-- Collapsed Hamburger -->
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+<!--                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
                     <span class="sr-only">Toggle Navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
-                </button>
+                </button> -->
 
                 <!-- Branding Image -->
+                @if (Auth::guest())
                 <a class="navbar-brand" href="{{ url('/') }}">
                     Magnet
                 </a>
+                @else
+                <a class="navbar-brand" href="{{ url('/home') }}">
+                    Magnet
+                </a>
+                @endif
+
             </div>
 
             <div class="collapse navbar-collapse" id="app-navbar-collapse">
@@ -132,6 +82,17 @@
                             </a>
 
                             <ul class="dropdown-menu" role="menu">
+                                <li>
+                                    <a href="{{ url('/refreshboards') }}"
+                                        onclick="event.preventDefault();
+                                                 document.getElementById('refreshboards-form').submit();">
+                                        Refresh Boards
+                                    </a>
+
+                                    <form id="refreshboards-form" action="{{ url('/refreshboards') }}" method="POST" style="display: none;">
+                                        {{ csrf_field() }}
+                                    </form>
+                                </li>
                                 <li>
                                     <a href="{{ url('/logout') }}"
                                         onclick="event.preventDefault();
@@ -155,5 +116,16 @@
 
     <!-- Scripts -->
     <script src="/js/app.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script> -->
+    <script src="/js/jquery.grid-a-licious.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#cards").gridalicious({
+                gutter: 20,
+                selector: '.card',
+                animate: true
+            });
+        });
+    </script>
 </body>
 </html>

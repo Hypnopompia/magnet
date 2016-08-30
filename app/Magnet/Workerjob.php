@@ -26,10 +26,12 @@ class Workerjob {
 
 	public function send() {
 		$sqs = AWS::createClient('sqs');
-		$result = $sqs->sendMessageBatch([
-			'QueueUrl' => Config::get("magnet.sqsQueueUrl"),
-			'Entries' => $this->entries
-		]);
+		if (is_array($this->entries) && count($this->entries) > 0) {
+			$result = $sqs->sendMessageBatch([
+				'QueueUrl' => Config::get("magnet.sqsQueueUrl"),
+				'Entries' => $this->entries
+			]);
+		}
 		$this->entries = [];
 	}
 }

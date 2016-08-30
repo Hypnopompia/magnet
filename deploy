@@ -1,0 +1,20 @@
+#!/bin/bash
+BRANCH=$(git name-rev --name-only HEAD)
+
+WEB_ENV=magnet-production
+WORKER_ENV=magnet-worker-production
+
+if [ "$BRANCH" == "master" ]; then
+	API_ENV=magnet-production
+	WORKER_ENV=magnet-worker-production
+fi
+
+echo "Deploying $BRANCH to $WEB_ENV"
+eb use $WEB_ENV && eb deploy
+VERSION=`eb status | grep "Deployed Version"|awk '{print $3}'`
+
+if [ "$1" == "all" ]; then
+	echo "Deploying $BRANCH to $WORKER_ENV"
+	eb use $WORKER_ENV && eb deploy --version $VERSION
+	eb use $WEB_ENV
+fi

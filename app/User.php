@@ -126,6 +126,8 @@ class User extends Authenticatable
     }
 
     public function importPins($board) {
+        $workerjob = new Workerjob;
+
         $pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
         $pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
 
@@ -164,9 +166,15 @@ class User extends Authenticatable
                         Log::error('pinCreateFailed', $newPin);
                     }
                 });
+
+                if ($pin->image == null) {
+                    $workerjob->addJob('DownloadImage', ['pin_id' => $pin->id]);
+                }
             }
 
             $page = $pins->pagination;
         } while ($pins->pagination);
+
+        $workerjob->send();
     }
 }

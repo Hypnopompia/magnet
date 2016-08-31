@@ -22,6 +22,9 @@ class SQSController extends Controller
 			case 'ResolvePinLink':
 				Pin::resolvePinLinkJob($request->jobdata);
 				break;
+			case 'DownloadImage':
+				Pin::downloadImageJob($request->jobdata);
+				break;
 			default:
 				throw new \Exception('Job type not found: ' . $request->jobname);
 		}

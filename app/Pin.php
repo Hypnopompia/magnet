@@ -5,6 +5,9 @@ namespace App;
 use App\Magnet\Workerjob;
 use Illuminate\Database\Eloquent\Model;
 
+use AWS;
+use Image;
+
 class Pin extends Model
 {
 
@@ -18,23 +21,23 @@ class Pin extends Model
 		});
 	}
 
-    public function boards()
-    {
-        return $this->belongsTo('App\Board');
-    }
+	public function boards()
+	{
+		return $this->belongsTo('App\Board');
+	}
 
-    public static function resolvePinLinkJob($jobData) {
-    	$pin = Pin::find($jobData['pin_id']);
-    	if (!$pin) {
-    		return false;
-    	}
+	public static function resolvePinLinkJob($jobData) {
+		$pin = Pin::find($jobData['pin_id']);
+		if (!$pin) {
+			return false;
+		}
 
-    	$pin->url = Pin::followLinkUrl($pin->link);
-    	$pin->save();
-    	return true;
-    }
+		$pin->url = Pin::followLinkUrl($pin->link);
+		$pin->save();
+		return true;
+	}
 
-    public static function followLinkUrl($url) {
+	public static function followLinkUrl($url) {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, true);
@@ -53,5 +56,54 @@ class Pin extends Model
 		*/
 
 		return $url; // Voila
-    }
+	}
+
+	public static function downloadImageJob($jobData) {
+		$pin = Pin::find($jobData['pin_id']);
+		if (!$pin) {
+			return false;
+		}
+
+		$pin->downloadImage();
+	}
+
+	public function downloadImage() {
+		if (!$this->imageurl) {
+			return false;
+		}
+
+		$image = Image::make($this->imageurl);
+		switch ($image->mime()) {
+			case 'image/jpeg':
+				$ext = 'jpg';
+				break;
+			case 'image/gif':
+				$ext = 'gif';
+				break;
+			case 'image/png':
+				$ext = 'png';
+				break;
+			default:
+				Log::debug("Pin.downloadImage", ['unknownMimeType' => $image->mime()]);
+				return false;
+		}
+
+		$filename = $this->user_id . "/" . md5($image->encode($ext)) . "." . $ext;
+		$s3 = AWS::createClient('s3');
+
+		$s3->putObject([
+			'Bucket'      => config('magnet.imageBucket'),
+			'Key'         => $filename,
+			'Body'        => $image->encode($ext),
+			'ContentType' => $image->mime(),
+			'ACL'         => 'public-read'
+		]);
+
+		$this->image = $filename;
+		$this->save();
+
+		echo $filename . "\n";
+
+		return $this;
+	}
 }

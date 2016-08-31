@@ -17,7 +17,7 @@
                     @foreach ($boards as $board)
                         <div class="board">
                             <a href="{{ url('/board', [$board->id]) }}"><img src="{{ $board->imageurl }}" /></a>
-                            <a href="{{ url('/board', [$board->id]) }}">{{ $board->name }}</a>
+                            <a href="{{ url('/board', [$board->id]) }}">{{ $board->name }} ({{ $board->pins_count }})</a>
                         </div>
                     @endforeach
                     </div>

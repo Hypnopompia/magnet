@@ -20,6 +20,8 @@ Auth::routes();
 Route::get('/pinterest/callback', 'PinterestController@callback');
 
 Route::get('/home', 'HomeController@index');
+Route::get('/reset', 'HomeController@reset');
+
 Route::get('/board/{board}', 'HomeController@board');
 
 Route::post('/refreshboards', 'HomeController@refreshboards');

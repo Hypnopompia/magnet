@@ -20,7 +20,7 @@ class CreatePinsTable extends Migration
             $table->string("pinterestid")->unique();
             $table->string("link", 512)->nullable();
             $table->string("url", 1024)->nullable();
-            $table->string("note", 512)->nullable();
+            $table->text("note")->nullable();
             $table->string("imageurl")->nullable();
             $table->string("imagewidth")->nullable();
             $table->string("imageheight")->nullable();

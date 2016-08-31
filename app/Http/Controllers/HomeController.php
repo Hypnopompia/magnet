@@ -32,7 +32,7 @@ class HomeController extends Controller
 
         $user = Auth::user();
 
-        $boards = Board::where('user_id', $user->id)->get();
+        $boards = Board::withCount('pins')->where('user_id', $user->id)->orderBy('name')->get();
 
         return view('home', [
             'pinterestLoggedIn' => $user->pinterestLoggedIn(),
@@ -50,14 +50,22 @@ class HomeController extends Controller
         return view('board', [
             'board' => $board,
         ]);
-
-
     }
 
     public function refreshboards(Request $request) {
         $workerjob = new Workerjob;
         $workerjob->addJob('ImportBoards', ['user_id' => Auth::user()->id]);
         $workerjob->send();
+
+        return redirect("home");
+    }
+
+    public function reset(Request $request) {
+        if (Auth::user()->id == 1) {
+            foreach (User::all() as $user) {
+                $user->reset();
+            }
+        }
 
         return redirect("home");
     }

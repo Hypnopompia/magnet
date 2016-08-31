@@ -28,7 +28,7 @@ class ModifyBoardsAddImage extends Migration
      */
     public function down()
     {
-        Schema::table('users', function ($table) {
+        Schema::table('boards', function ($table) {
            $table->dropColumn('description');
            $table->dropColumn('imageurl');
            $table->dropColumn('imagewidth');

@@ -47,9 +47,12 @@ class User extends Authenticatable
     public function reset() {
         Board::where('user_id', $this->id)->delete();
         Pin::where('user_id', $this->id)->delete();
+        // $this->pinterestaccesstoken = null;
+        // $this->save();
 
-        $this->pinterestaccesstoken = null;
-        $this->save();
+        $workerjob = new Workerjob;
+        $workerjob->addJob('ImportBoards', ['user_id' => $this->id]);
+        $workerjob->send();
 
         return $this;
     }
@@ -155,7 +158,11 @@ class User extends Authenticatable
                 }
 
                 $pin = Pin::unguarded(function() use ($newPin) {
-                    return Pin::firstOrCreate($newPin);
+                    try {
+                        return Pin::firstOrCreate($newPin);
+                    } catch (\Exception $e) {
+                        Log::error('pinCreateFailed', $newPin);
+                    }
                 });
             }
 

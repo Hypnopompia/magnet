@@ -105,62 +105,75 @@ class User extends Authenticatable
 				// $workerjob->addJob('ImportPins', ['board_id' => $board->id]);
 			}
 
-			$page = $boards->pagination;
-		} while ($page);
+			if ($boards->pagination) {
+				$page['cursor'] = $boards->pagination->cursor;
+			}
+		} while ($boards->pagination);
 
 		$workerjob->send();
 	}
 
-	public function importPins($board) {
+	public function importPins(Board $board) {
 		$workerjob = new Workerjob;
 
 		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
 		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
 
-		$user = $this;
 		$page = [];
 
 		do {
-			$pins = $pinterest->pins->fromBoard($board->pinterestid, array_merge($page, ['fields' => 'id,link,url,note,color,media,attribution,image,metadata']));
-			foreach ($pins as $p) {
+			$pins = false;
+			$options = array_merge($page, ['fields' => 'id,link,url,note,color,media,attribution,image,metadata']);
 
-				$newPin = [
-					'user_id' => $user->id,
-					'board_id' => $board->id,
-					'pinterestid' => $p->id,
-					'link' => $p->link,
-					'note' => $p->note,
-					'color' => $p->color,
-				];
+			try {
+				$pins = $pinterest->pins->fromBoard($board->pinterestid, $options);
 
-				if (isset($p->image['original']['url'])) {
-					$newPin['imageurl'] = $p->image['original']['url'];
-				}
+				foreach ($pins as $p) {
+					$newPin = [
+						'user_id' => $this->id,
+						'board_id' => $board->id,
+						'pinterestid' => $p->id,
+						'link' => $p->link,
+						'note' => $p->note,
+						'color' => $p->color,
+					];
 
-				if (isset($p->image['original']['width'])) {
-					$newPin['imagewidth'] = $p->image['original']['width'];
-				}
-
-				if (isset($p->image['original']['height'])) {
-					$newPin['imageheight'] = $p->image['original']['height'];
-				}
-
-				$pin = Pin::unguarded(function() use ($newPin) {
-					try {
-						return Pin::firstOrCreate($newPin);
-					} catch (\Exception $e) {
-						Log::error('pinCreateFailed', ['pin' => $newPin, 'error' => $e->getMessage()]);
-						return false;
+					if (isset($p->image['original']['url'])) {
+						$newPin['imageurl'] = $p->image['original']['url'];
 					}
-				});
 
-				if ($pin && $pin->image == null) {
-					$workerjob->addJob('DownloadImage', ['pin_id' => $pin->id]);
+					if (isset($p->image['original']['width'])) {
+						$newPin['imagewidth'] = $p->image['original']['width'];
+					}
+
+					if (isset($p->image['original']['height'])) {
+						$newPin['imageheight'] = $p->image['original']['height'];
+					}
+
+					$pin = Pin::unguarded(function() use ($newPin) {
+						try {
+							return Pin::firstOrCreate($newPin);
+						} catch (\Exception $e) {
+							Log::error('pinCreateFailed', ['pin' => $newPin, 'error' => $e->getMessage()]);
+							return false;
+						}
+					});
+
+					if ($pin && $pin->image == null) {
+						$workerjob->addJob('DownloadImage', ['pin_id' => $pin->id]);
+					}
 				}
+
+				if ($pins->pagination) {
+					$page['cursor'] = $pins->pagination->cursor;
+				}
+
+			} catch (\Exception $e) {
+				Log::error("fromBoardFailed", [ 'user' => $this, 'board' => $board, 'options' => $options, 'error' => $e->getMessage() ]);
 			}
 
-			$page = $pins->pagination;
-		} while ($pins->pagination);
+
+		} while ($pins && $pins->pagination);
 
 		$workerjob->send();
 	}

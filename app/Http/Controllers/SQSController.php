@@ -66,7 +66,6 @@ class SQSController extends Controller
 				->first();
 
 			if ($board) {
-				Log::debug("Adding ImportPins Job", ['user' => $user, 'board' => $board]);
 				$workerjob->addJob('ImportPins', ['board_id' => $board->id]);
 
 				if ($board->imported) {
@@ -75,8 +74,6 @@ class SQSController extends Controller
 					$board->imported = true;
 					$board->save();
 				}
-			} else {
-				Log::debug("No boards need importing", ['user' => $user]);
 			}
 		}
 

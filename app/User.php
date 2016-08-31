@@ -72,15 +72,21 @@ class User extends Authenticatable
 		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
 		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
 
-		$user = $this;
-		$page = [];
-
+		$boards = false;
 		do {
-			$boards = $pinterest->users->getMeBoards( array_merge($page, ['fields' => 'id,name,url,description,creator,created_at,counts,image']) );
+			$page = [];
+
+			if ($pins && is_array($pins->pagination)) {
+				$page['cursor'] = $pins->pagination['cursor'];
+			}
+
+			$options = array_merge($page, ['fields' => 'id,name,url,description,creator,created_at,counts,image']);
+
+			$boards = $pinterest->users->getMeBoards( $options );
 
 			foreach ($boards as $b) {
 				$newBoard = [
-					'user_id' => $user->id,
+					'user_id' => $this->id,
 					'pinterestid' => $b->id,
 					'name' => $b->name,
 					'description' => $b->description,
@@ -105,10 +111,7 @@ class User extends Authenticatable
 				// $workerjob->addJob('ImportPins', ['board_id' => $board->id]);
 			}
 
-			if ($boards->pagination) {
-				$page['cursor'] = $boards->pagination->cursor;
-			}
-		} while ($boards->pagination);
+		} while ($boards && $boards->pagination);
 
 		$workerjob->send();
 	}
@@ -118,11 +121,15 @@ class User extends Authenticatable
 
 		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
 		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
-
-		$page = [];
+		$pins = false;
 
 		do {
-			$pins = false;
+			$page = [];
+
+			if ($pins && is_array($pins->pagination)) {
+				$page['cursor'] = $pins->pagination['cursor'];
+			}
+
 			$options = array_merge($page, ['fields' => 'id,link,url,note,color,media,attribution,image,metadata']);
 
 			try {
@@ -164,14 +171,9 @@ class User extends Authenticatable
 					}
 				}
 
-				if ($pins->pagination) {
-					$page['cursor'] = $pins->pagination->cursor;
-				}
-
 			} catch (\Exception $e) {
 				Log::error("fromBoardFailed", [ 'user' => $this, 'board' => $board, 'options' => $options, 'error' => $e->getMessage() ]);
 			}
-
 
 		} while ($pins && $pins->pagination);
 

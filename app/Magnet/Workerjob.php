@@ -7,10 +7,11 @@ use Config;
 class Workerjob {
 	protected $entries = [];
 
-	public function addJob($jobname, $jobdata) {
+	public function addJob($jobname, $jobdata, $delaySeconds = 0) {
 		$id = time() . "_" . count($this->entries) . "_" . $jobname;
 		$this->entries[] = [
 			'Id' => $id,
+			'DelaySeconds' => $delaySeconds,
 			'MessageBody' => json_encode([
 				'jobname' => $jobname,
 				'jobdata' => $jobdata

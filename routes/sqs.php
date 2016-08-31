@@ -1,4 +1,5 @@
 <?php
 
 Route::any('/sqs', 'SQSController@sqs');
-Route::any('/sqs.addjobs', 'SQSController@addjobs');
+Route::any('/sqs.addboardsjobs', 'SQSController@addBoardsJobs');
+Route::any('/sqs.addpinsjobs', 'SQSController@addPinsJobs');

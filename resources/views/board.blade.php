@@ -15,7 +15,7 @@
                     <div id="cards">
                     @foreach ($board->pins as $pin)
                         <div class="card" style="opacity: 0;">
-                            <a href="{{ $pin->url }}" target="_blank"><img src="{{ $pin->imageurl }}" /></a>
+                            <a href="{{ $pin->urllink }}" target="_blank"><img src="{{ $pin->imagelink }}" /></a>
                             <p>{{ $pin->note }}</p>
                         </div>
                     @endforeach

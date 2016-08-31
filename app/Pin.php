@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use AWS;
 use Image;
+use Log;
 
 class Pin extends Model
 {
@@ -21,20 +22,30 @@ class Pin extends Model
 		});
 	}
 
-	public function boards()
-	{
+	public function board() {
 		return $this->belongsTo('App\Board');
 	}
 
-	public static function resolvePinLinkJob($jobData) {
-		$pin = Pin::find($jobData['pin_id']);
-		if (!$pin) {
-			return false;
+	public function getUrllinkAttribute($value) {
+		if ($this->url) {
+			return $this->url;
 		}
 
-		$pin->url = Pin::followLinkUrl($pin->link);
-		$pin->save();
-		return true;
+		return $this->link;
+	}
+
+	public function getImagelinkAttribute($value) {
+		if ($this->image) {
+			return "https://s3.amazonaws.com/" . config("magnet.imageBucket") . "/" . $this->image;
+		}
+
+		return $this->imageurl;
+	}
+
+	public function resolvePinLink() {
+		$this->url = Pin::followLinkUrl($this->link);
+		$this->save();
+		return $this;
 	}
 
 	public static function followLinkUrl($url) {
@@ -58,21 +69,18 @@ class Pin extends Model
 		return $url; // Voila
 	}
 
-	public static function downloadImageJob($jobData) {
-		$pin = Pin::find($jobData['pin_id']);
-		if (!$pin) {
-			return false;
-		}
-
-		$pin->downloadImage();
-	}
-
 	public function downloadImage() {
 		if (!$this->imageurl) {
 			return false;
 		}
 
-		$image = Image::make($this->imageurl);
+		try {
+			$image = Image::make($this->imageurl);
+		} catch (\Exception $e) {
+			Log::error('Pin.downloadImageFailed', ['error' => $e->getMessage()]);
+			return false;
+		}
+
 		switch ($image->mime()) {
 			case 'image/jpeg':
 				$ext = 'jpg';
@@ -88,7 +96,7 @@ class Pin extends Model
 				return false;
 		}
 
-		$filename = $this->user_id . "/" . md5($image->encode($ext)) . "." . $ext;
+		$filename = $this->user_id . "/" . sha1($image->encode($ext)) . "." . $ext;
 		$s3 = AWS::createClient('s3');
 
 		$s3->putObject([
@@ -101,8 +109,6 @@ class Pin extends Model
 
 		$this->image = $filename;
 		$this->save();
-
-		echo $filename . "\n";
 
 		return $this;
 	}

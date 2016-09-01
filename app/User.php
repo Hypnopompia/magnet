@@ -67,53 +67,49 @@ class User extends Authenticatable
 	}
 
 	public function importBoards() {
-		$workerjob = new Workerjob;
-
 		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
 		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
-
 		$boards = false;
+
 		do {
-			$page = [];
+			$options = ['fields' => 'id,name,url,description,creator,created_at,counts,image'];
 
-			if ($pins && is_array($pins->pagination)) {
-				$page['cursor'] = $pins->pagination['cursor'];
+			if ($boards && is_array($boards->pagination)) {
+				$options['cursor'] = $boards->pagination['cursor'];
 			}
 
-			$options = array_merge($page, ['fields' => 'id,name,url,description,creator,created_at,counts,image']);
+			try {
+				$boards = $pinterest->users->getMeBoards( $options );
 
-			$boards = $pinterest->users->getMeBoards( $options );
+				foreach ($boards as $b) {
+					$newBoard = [
+						'user_id' => $this->id,
+						'pinterestid' => $b->id,
+						'name' => $b->name,
+						'description' => $b->description,
+					];
 
-			foreach ($boards as $b) {
-				$newBoard = [
-					'user_id' => $this->id,
-					'pinterestid' => $b->id,
-					'name' => $b->name,
-					'description' => $b->description,
-				];
+					if (isset($b->image['60x60']['url'])) {
+						$newBoard['imageurl'] = $b->image['60x60']['url'];
+					}
 
-				if (isset($b->image['60x60']['url'])) {
-					$newBoard['imageurl'] = $b->image['60x60']['url'];
+					if (isset($b->image['60x60']['width'])) {
+						$newBoard['imagewidth'] = $b->image['60x60']['width'];
+					}
+
+					if (isset($b->image['60x60']['height'])) {
+						$newBoard['imageheight'] = $b->image['60x60']['height'];
+					}
+
+					$board = Board::unguarded(function() use ($newBoard) {
+						return Board::firstOrCreate($newBoard);
+					});
 				}
-
-				if (isset($b->image['60x60']['width'])) {
-					$newBoard['imagewidth'] = $b->image['60x60']['width'];
-				}
-
-				if (isset($b->image['60x60']['height'])) {
-					$newBoard['imageheight'] = $b->image['60x60']['height'];
-				}
-
-				$board = Board::unguarded(function() use ($newBoard) {
-					return Board::firstOrCreate($newBoard);
-				});
-
-				// $workerjob->addJob('ImportPins', ['board_id' => $board->id]);
+			} catch (\Exception $e) {
+				Log::error("importBoardsFailed", ['exception' => $e->getMessage(), 'user' => $this]);
+				return false;
 			}
-
 		} while ($boards && $boards->pagination);
-
-		$workerjob->send();
 	}
 
 	public function importPins(Board $board) {
@@ -124,13 +120,11 @@ class User extends Authenticatable
 		$pins = false;
 
 		do {
-			$page = [];
+			$options = ['fields' => 'id,link,url,note,color,media,attribution,image,metadata'];
 
 			if ($pins && is_array($pins->pagination)) {
-				$page['cursor'] = $pins->pagination['cursor'];
+				$options['cursor'] = $pins->pagination['cursor'];
 			}
-
-			$options = array_merge($page, ['fields' => 'id,link,url,note,color,media,attribution,image,metadata']);
 
 			try {
 				$pins = $pinterest->pins->fromBoard($board->pinterestid, $options);
@@ -167,16 +161,18 @@ class User extends Authenticatable
 					});
 
 					if ($pin && $pin->image == null) {
-						$workerjob->addJob('DownloadImage', ['pin_id' => $pin->id]);
+						$workerjob->addJob('DownloadImage', ['pin_id' => $pin->id])->send();
 					}
 				}
 
 			} catch (\Exception $e) {
-				Log::error("fromBoardFailed", [ 'user' => $this, 'board' => $board, 'options' => $options, 'error' => $e->getMessage() ]);
+				$board->imported = false;
+				$board->save();
+				Log::error("importPinsFailed", ['exception' => $e->getMessage(), 'board' => $board]);
+				return false;
 			}
 
-		} while ($pins && $pins->pagination);
 
-		$workerjob->send();
+		} while ($pins && $pins->pagination);
 	}
 }

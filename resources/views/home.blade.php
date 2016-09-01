@@ -27,7 +27,13 @@
                                 <h4 class="media-heading">
                                     <a href="{{ url('/board', [$board->id]) }}">{{ $board->name }}</a>
                                 </h4>
+
+                                @if($board->refreshed_at != null)
                                 <p>{{ $board->pins_count }} pins</p>
+                                @else
+                                <p><i>Import in progress</i></p>
+                                @endif
+
                                 {{ $board->description }}
                             </div>
                         </div>

@@ -83,6 +83,10 @@ class User extends Authenticatable
 		do {
 			$boards = $this->fetchPinterestBoards($cursor);
 
+			if (!$boards) {
+				return false;
+			}
+
 			if ($boards->pagination) {
 				$cursor = $boards->pagination['cursor'];
 			}

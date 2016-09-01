@@ -9,6 +9,11 @@
                     <a href="{{ url('home') }}">Boards</a>
                     |
                     {{ $board->name }}
+                    @if($board->refreshed_at != null)
+                    ( {{ $board->pins->count() }} pins - Last Checked: <span class="utcdate" data-utc="{{ $board->refreshed_at }}" data-dateformat="M/D/YY h:MMa"></span> )
+                    @endif
+
+
                 </div>
 
                 <div class="panel-body">

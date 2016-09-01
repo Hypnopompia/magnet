@@ -120,12 +120,18 @@
     <script src="/js/app.js"></script>
     <!-- <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script> -->
     <script src="/js/jquery.grid-a-licious.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.js" integrity="sha256-r0aM431Bg/RlVfWPOWRVQ/HFvxZDYV/LM9OcUKFLd+Q=" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function () {
             $("#cards").gridalicious({
                 gutter: 20,
                 selector: '.card',
                 animate: true
+            });
+
+            $(".utcdate").each(function(){
+                var messageLocalTime = moment.utc( $(this).attr('data-utc') ).toDate();
+                $(this).html( moment(messageLocalTime).format( $(this).attr('data-dateformat') ) );
             });
         });
     </script>

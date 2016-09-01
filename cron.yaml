@@ -5,4 +5,4 @@ cron:
     schedule: "0 0 * * *"
   - name: "add-pins-jobs"
     url: "/sqs.addpinsjobs"
-    schedule: "*/10 * * * *"
+    schedule: "*/15 * * * *"

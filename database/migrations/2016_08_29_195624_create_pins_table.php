@@ -19,7 +19,7 @@ class CreatePinsTable extends Migration
 			$table->integer('board_id');
 			$table->string("pinteresturl", 512)->nullable();
 			$table->string("pinterestlink", 512)->nullable();
-			$table->string("url", 1024)->nullable();
+			$table->string("url", 2048)->nullable();
 			$table->string("pinterestimage")->nullable();
 			$table->string("image")->nullable();
 			$table->string("imagewidth")->nullable();

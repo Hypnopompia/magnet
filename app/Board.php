@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Log;
 use Carbon\Carbon;
 use DirkGroenen\Pinterest\Pinterest;
 use Illuminate\Database\Eloquent\Model;
@@ -61,6 +62,7 @@ class Board extends Model
 
 		try {
 			$pins = $pinterest->pins->fromBoard($this->pinterestid, $options);
+			Log::info("fetchPins", ['board_id' => $this->id, 'cursor' => $cursor, 'ratelimitremaining' => $pinterest->getRateLimitRemaining(), 'ratelimit' => $pinterest->getRateLimit() ]);
 		} catch (\Exception $e) {
 			Log::error("fetchPinterestPins", ['exception' => $e->getMessage(), 'user' => $this]);
 			return false;
@@ -71,9 +73,12 @@ class Board extends Model
 
 	public function importPins() {
 		$cursor = null;
-
 		do {
 			$pins = $this->fetchPinterestPins($cursor);
+
+			if (!$pins) {
+				return false;
+			}
 
 			if ($pins->pagination) {
 				$cursor = $pins->pagination['cursor'];
@@ -82,7 +87,6 @@ class Board extends Model
 			foreach ($pins as $pin) {
 				Pin::savePinterestPin($this, $pin);
 			}
-
 		} while ($pins && $pins->pagination);
 
 		$this->refreshed_at = Carbon::now();

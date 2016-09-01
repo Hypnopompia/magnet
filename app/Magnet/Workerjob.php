@@ -35,4 +35,10 @@ class Workerjob {
 		}
 		$this->entries = [];
 	}
+
+	public static function sendJob($jobname, $jobdata, $delaySeconds = 0) {
+		$workerjob = new Workerjob();
+		$workerjob->addJob($jobname, $jobdata, $delaySeconds)->send();
+		return true;
+	}
 }

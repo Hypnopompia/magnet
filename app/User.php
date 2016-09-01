@@ -45,10 +45,10 @@ class User extends Authenticatable
 	}
 
 	public function reset() {
-		Board::where('user_id', $this->id)->delete();
-		Pin::where('user_id', $this->id)->delete();
-		// $this->pinterestaccesstoken = null;
-		// $this->save();
+		foreach ($this->boards as $board) {
+			Pin::where('board_id', $board->id)->delete();
+			$board->delete();
+		}
 
 		$workerjob = new Workerjob;
 		$workerjob->addJob('ImportBoards', ['user_id' => $this->id]);
@@ -57,122 +57,41 @@ class User extends Authenticatable
 		return $this;
 	}
 
-	public function printBoards() {
+	public function fetchPinterestBoards($cursor = null) {
 		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
 		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
 
-		$page = [];
-		$boards = $pinterest->users->getMeBoards( array_merge($page, ['fields' => 'id,name,url,description,creator,created_at,counts,image']) );
-		dd($boards);
+		$options = ['fields' => 'id,name,url,description,creator,created_at,counts,image'];
+
+		if ($cursor) {
+			$options['cursor'] = $cursor;
+		}
+
+		try {
+			$boards = $pinterest->users->getMeBoards($options);
+		} catch (\Exception $e) {
+			Log::error("fetchPinterestBoards", ['exception' => $e->getMessage(), 'user' => $this]);
+			return false;
+		}
+
+		return $boards;
 	}
 
 	public function importBoards() {
-		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
-		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
-		$boards = false;
+		$cursor = null;
 
 		do {
-			$options = ['fields' => 'id,name,url,description,creator,created_at,counts,image'];
+			$boards = $this->fetchPinterestBoards($cursor);
 
-			if ($boards && is_array($boards->pagination)) {
-				$options['cursor'] = $boards->pagination['cursor'];
+			if ($boards->pagination) {
+				$cursor = $boards->pagination['cursor'];
 			}
 
-			try {
-				$boards = $pinterest->users->getMeBoards( $options );
-
-				foreach ($boards as $b) {
-					$newBoard = [
-						'user_id' => $this->id,
-						'pinterestid' => $b->id,
-						'name' => $b->name,
-						'description' => $b->description,
-					];
-
-					if (isset($b->image['60x60']['url'])) {
-						$newBoard['imageurl'] = $b->image['60x60']['url'];
-					}
-
-					if (isset($b->image['60x60']['width'])) {
-						$newBoard['imagewidth'] = $b->image['60x60']['width'];
-					}
-
-					if (isset($b->image['60x60']['height'])) {
-						$newBoard['imageheight'] = $b->image['60x60']['height'];
-					}
-
-					$board = Board::unguarded(function() use ($newBoard) {
-						return Board::firstOrCreate($newBoard);
-					});
-				}
-			} catch (\Exception $e) {
-				Log::error("importBoardsFailed", ['exception' => $e->getMessage(), 'user' => $this]);
-				return false;
+			foreach ($boards as $board) {
+				Board::savePinterestBoard($this, $board);
 			}
+
 		} while ($boards && $boards->pagination);
 	}
 
-	public function importPins(Board $board) {
-		$workerjob = new Workerjob;
-
-		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
-		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
-		$pins = false;
-
-		do {
-			$options = ['fields' => 'id,link,url,note,color,media,attribution,image,metadata'];
-
-			if ($pins && is_array($pins->pagination)) {
-				$options['cursor'] = $pins->pagination['cursor'];
-			}
-
-			try {
-				$pins = $pinterest->pins->fromBoard($board->pinterestid, $options);
-
-				foreach ($pins as $p) {
-					$newPin = [
-						'user_id' => $this->id,
-						'board_id' => $board->id,
-						'pinterestid' => $p->id,
-						'link' => $p->link,
-						'note' => $p->note,
-						'color' => $p->color,
-					];
-
-					if (isset($p->image['original']['url'])) {
-						$newPin['imageurl'] = $p->image['original']['url'];
-					}
-
-					if (isset($p->image['original']['width'])) {
-						$newPin['imagewidth'] = $p->image['original']['width'];
-					}
-
-					if (isset($p->image['original']['height'])) {
-						$newPin['imageheight'] = $p->image['original']['height'];
-					}
-
-					$pin = Pin::unguarded(function() use ($newPin) {
-						try {
-							return Pin::firstOrCreate($newPin);
-						} catch (\Exception $e) {
-							Log::error('pinCreateFailed', ['pin' => $newPin, 'error' => $e->getMessage()]);
-							return false;
-						}
-					});
-
-					if ($pin && $pin->image == null) {
-						$workerjob->addJob('DownloadImage', ['pin_id' => $pin->id])->send();
-					}
-				}
-
-			} catch (\Exception $e) {
-				$board->imported = false;
-				$board->save();
-				Log::error("importPinsFailed", ['exception' => $e->getMessage(), 'board' => $board]);
-				return false;
-			}
-
-
-		} while ($pins && $pins->pagination);
-	}
 }

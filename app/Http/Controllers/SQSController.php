@@ -16,11 +16,10 @@ class SQSController extends Controller
 
 		switch ($request->jobname) {
 			case 'ImportBoards':
-				User::find($$request->jobdata['user_id'])->importBoards();
+				User::find($request->jobdata['user_id'])->importBoards();
 				break;
 			case 'ImportPins':
-				$board = Board::find($request->jobdata['board_id']);
-				$board->user->importPins($board);
+				Board::find($request->jobdata['board_id'])->importPins();
 				break;
 			case 'ResolvePinLink':
 				Pin::find($request->jobdata['pin_id'])->resolvePinLink();
@@ -58,22 +57,15 @@ class SQSController extends Controller
 			// Get the first board that either hasn't been imported or hasn't been updated in more than a day
 			$board = $user->boards()
 				->where(function($q){
-					$q->where('updated_at', '<', Carbon::now()->subDay() )
-					->orWhere('imported', false);
+					$q->where('refreshed_at', '<', Carbon::now()->subDay() )
+					->orWhereNull('refreshed_at');
 				})
-				->orderBy('imported')
+				->orderBy('refreshed_at')
 				->orderBy('updated_at')
 				->first();
 
 			if ($board) {
 				$workerjob->addJob('ImportPins', ['board_id' => $board->id]);
-
-				if ($board->imported) {
-					$board->touch();
-				} else {
-					$board->imported = true;
-					$board->save();
-				}
 			}
 		}
 

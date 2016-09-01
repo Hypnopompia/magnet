@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+	return view('welcome');
 });
 
 Auth::routes();
@@ -24,4 +24,5 @@ Route::get('/reset', 'HomeController@reset');
 
 Route::get('/board/{board}', 'HomeController@board');
 
-Route::post('/refreshboards', 'HomeController@refreshboards');
+Route::get('/importboards', 'HomeController@importboards');
+Route::get('/importpins', 'HomeController@importpins');

@@ -2,10 +2,11 @@
 
 namespace App;
 
-use App\Magnet\Workerjob;
-use Illuminate\Database\Eloquent\Model;
-
 use AWS;
+use App\Board;
+use App\Magnet\Workerjob;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Image;
 use Log;
 
@@ -17,7 +18,7 @@ class Pin extends Model
 
 		Pin::created(function ($pin) {
 			$workerjob = new Workerjob;
-			$workerjob->addJob('ResolvePinLink', ['pin_id' => $pin->id]);
+			// $workerjob->addJob('ResolvePinLink', ['pin_id' => $pin->id]);
 			$workerjob->send();
 		});
 	}
@@ -42,8 +43,44 @@ class Pin extends Model
 		return $this->imageurl;
 	}
 
+	public static function savePinterestPin(Board $board, $pinterestPin) {
+		$pin = Pin::where('pinterestid', $pinterestPin->id)->first();
+
+		if (!$pin) {
+			$pin = new Pin();
+			$pin->pinterestid = $pinterestPin->id;
+			$pin->board_id = $board->id;
+		}
+
+		$pin->pinteresturl = $pinterestPin->url;
+		$pin->pinterestlink = $pinterestPin->link;
+		$pin->url = $pinterestPin->original_link;
+		$pin->note = $pinterestPin->note;
+		$pin->color = $pinterestPin->color;
+		$pin->pinterestcreated_at = new Carbon($pinterestPin->created_at);
+
+		if (isset($pinterestPin->image['original']['url'])) {
+			$pin->pinterestimage = $pinterestPin->image['original']['url'];
+		}
+
+		if (isset($pinterestPin->image['original']['width'])) {
+			$pin->imagewidth = $pinterestPin->image['original']['width'];
+		}
+
+		if (isset($pinterestPin->image['original']['height'])) {
+			$pin->imageheight = $pinterestPin->image['original']['height'];
+		}
+
+		$pin->save();
+
+		if ($pin && $pin->image == null) {
+			Workerjob::sendJob('DownloadImage', ['pin_id' => $pin->id]);
+		}
+		return $pin;
+	}
+
 	public function resolvePinLink() {
-		$this->url = Pin::followLinkUrl($this->link);
+		$this->url = Pin::followLinkUrl($this->pinterestlink);
 		$this->save();
 		return $this;
 	}
@@ -70,12 +107,12 @@ class Pin extends Model
 	}
 
 	public function downloadImage() {
-		if (!$this->imageurl) {
+		if (!$this->pinterestimage) {
 			return false;
 		}
 
 		try {
-			$image = Image::make($this->imageurl);
+			$image = Image::make($this->pinterestimage);
 		} catch (\Exception $e) {
 			Log::error('Pin.downloadImageFailed', ['error' => $e->getMessage()]);
 			return false;
@@ -96,7 +133,7 @@ class Pin extends Model
 				return false;
 		}
 
-		$filename = $this->user_id . "/" . sha1($image->encode($ext)) . "." . $ext;
+		$filename = $this->board->user_id . "/" . sha1($image->encode($ext)) . "." . $ext;
 		$s3 = AWS::createClient('s3');
 
 		$s3->putObject([

@@ -20,8 +20,16 @@
             box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
         }
 
-        #boards .board {
+        .board {
+            border-radius: 3px;
+            -webkit-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
+            -moz-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
+            box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
             margin-bottom: 10px;
+        }
+
+        .board .media-body {
+            padding-top: 5px;
         }
 
         #cards .card p {
@@ -83,15 +91,9 @@
 
                             <ul class="dropdown-menu" role="menu">
                                 <li>
-                                    <a href="{{ url('/refreshboards') }}"
-                                        onclick="event.preventDefault();
-                                                 document.getElementById('refreshboards-form').submit();">
-                                        Refresh Boards
+                                    <a href="{{ url('/importboards') }}">
+                                        Import Boards
                                     </a>
-
-                                    <form id="refreshboards-form" action="{{ url('/refreshboards') }}" method="POST" style="display: none;">
-                                        {{ csrf_field() }}
-                                    </form>
                                 </li>
                                 <li>
                                     <a href="{{ url('/logout') }}"

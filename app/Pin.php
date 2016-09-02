@@ -46,6 +46,12 @@ class Pin extends Model
 	public static function savePinterestPin(Board $board, $pinterestPin) {
 		$pin = Pin::where('pinterestid', $pinterestPin->id)->first();
 
+		if ($pin && $pin->board_id !== $board->id) { // We found a pin, but it's on the wrong board so reimport it to the right board.
+			Log::info('pinOnWrongBoard', ['pin' => $pin]);
+			$pin->delete();
+			$pin = false;
+		}
+
 		if (!$pin) {
 			$pin = new Pin();
 			$pin->pinterestid = $pinterestPin->id;

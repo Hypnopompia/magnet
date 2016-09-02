@@ -1,10 +1,7 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Board;
-use App\Magnet\Workerjob;
-use App\User;
 use Auth;
 use DirkGroenen\Pinterest\Pinterest;
 use Illuminate\Http\Request;
@@ -43,38 +40,4 @@ class HomeController extends Controller
 
 	}
 
-	public function board(Board $board) {
-		$user = Auth::user();
-		$board->load('pins');
-
-		return view('board', [
-			'board' => $board,
-		]);
-	}
-
-	public function importboards(Request $request) {
-		$workerjob = new Workerjob;
-		$workerjob->addJob('ImportBoards', ['user_id' => Auth::user()->id]);
-		$workerjob->send();
-
-		return redirect("home");
-	}
-
-	public function importpins(Request $request) {
-		$workerjob = new Workerjob;
-		$workerjob->addJob('ImportPins', ['board_id' => $request->board_id]);
-		$workerjob->send();
-
-		return redirect("home");
-	}
-
-	public function reset(Request $request) {
-		if (Auth::user()->id == 1) {
-			foreach (User::all() as $user) {
-				$user->reset();
-			}
-		}
-
-		return redirect("home");
-	}
 }

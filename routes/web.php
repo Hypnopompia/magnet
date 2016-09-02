@@ -18,11 +18,5 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/pinterest/callback', 'PinterestController@callback');
-
 Route::get('/home', 'HomeController@index');
-Route::get('/reset', 'HomeController@reset');
-
-Route::get('/board/{board}', 'HomeController@board');
-
-Route::get('/importboards', 'HomeController@importboards');
-Route::get('/importpins', 'HomeController@importpins');
+Route::get('/board/{board}', 'BoardController@index');

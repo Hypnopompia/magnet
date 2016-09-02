@@ -91,5 +91,7 @@ class Board extends Model
 
 		$this->refreshed_at = Carbon::now();
 		$this->save();
+
+		return $this;
 	}
 }

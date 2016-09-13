@@ -181,6 +181,8 @@ return [
         Aws\Laravel\AwsServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
 
+        Magnet\Pinterest\PinterestServiceProvider::class,
+
     ],
 
     /*
@@ -231,6 +233,7 @@ return [
         'AWS' => Aws\Laravel\AwsFacade::class,
         'Image' => Intervention\Image\Facades\Image::class,
 
+        'Pinterest' => Magnet\Facades\Pinterest::class,
     ],
 
 ];

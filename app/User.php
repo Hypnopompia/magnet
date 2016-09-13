@@ -4,12 +4,10 @@ namespace App;
 
 use App\Board;
 use App\Magnet\Workerjob;
-use DirkGroenen\Pinterest\Endpoints\Boards;
-use DirkGroenen\Pinterest\Endpoints\Pins;
-use DirkGroenen\Pinterest\Pinterest;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Log;
+use Pinterest;
 
 class User extends Authenticatable
 {
@@ -61,10 +59,11 @@ class User extends Authenticatable
 		return $this;
 	}
 
-	public function fetchPinterestBoards($cursor = null) {
-		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
-		$pinterest->auth->setOAuthToken($this->pinterestaccesstoken);
+	public function getPinterestUserInfo() {
+		return Pinterest::withUser($this)->userInfo();
+	}
 
+	public function fetchPinterestBoards($cursor = null) {
 		$options = ['fields' => 'id,name,url,description,creator,created_at,counts,image'];
 
 		if ($cursor) {
@@ -72,7 +71,7 @@ class User extends Authenticatable
 		}
 
 		try {
-			$boards = $pinterest->users->getMeBoards($options);
+			$boards = Pinterest::withUser($this)->getBoards($options);
 		} catch (\Exception $e) {
 			Log::error("fetchPinterestBoards", ['exception' => $e->getMessage(), 'user' => $this]);
 			return false;

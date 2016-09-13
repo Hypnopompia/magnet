@@ -4,7 +4,7 @@ namespace App;
 
 use Log;
 use Carbon\Carbon;
-use DirkGroenen\Pinterest\Pinterest;
+use Pinterest;
 use Illuminate\Database\Eloquent\Model;
 
 class Board extends Model
@@ -51,9 +51,6 @@ class Board extends Model
 	}
 
 	public function fetchPinterestPins($cursor = null) {
-		$pinterest = new Pinterest(config("services.pinterest.appid"), config("services.pinterest.appsecret"));
-		$pinterest->auth->setOAuthToken($this->user->pinterestaccesstoken);
-
 		$options = ['fields' => 'id,link,note,url,attribution,original_link,color,counts,created_at,creator,image,media,metadata'];
 
 		if ($cursor) {
@@ -61,8 +58,8 @@ class Board extends Model
 		}
 
 		try {
-			$pins = $pinterest->pins->fromBoard($this->pinterestid, $options);
-			Log::info("fetchPins", ['board_id' => $this->id, 'cursor' => $cursor, 'ratelimitremaining' => $pinterest->getRateLimitRemaining(), 'ratelimit' => $pinterest->getRateLimit() ]);
+			$pins = Pinterest::withUser($this->user)->getBoardPins($this->pinterestid, $options);
+			Log::info("fetchPins", ['board_id' => $this->id, 'cursor' => $cursor, 'ratelimitremaining' => Pinterest::getRateLimitRemaining(), 'ratelimit' => Pinterest::getRateLimit() ]);
 		} catch (\Exception $e) {
 			Log::error("fetchPinterestPins", ['exception' => $e->getMessage(), 'user' => $this]);
 			return false;

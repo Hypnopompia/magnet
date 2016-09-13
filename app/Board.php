@@ -15,7 +15,7 @@ class Board extends Model
 
 	public function pins()
 	{
-		return $this->hasMany('App\Pin');
+		return $this->hasMany('App\Pin')->orderBy('pinterestcreated_at', 'DESC');
 	}
 
 

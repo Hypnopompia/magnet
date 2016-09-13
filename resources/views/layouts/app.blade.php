@@ -12,31 +12,6 @@
 
     <!-- Styles -->
     <link href="/css/app.css" rel="stylesheet">
-    <style type="text/css">
-        .card {
-            border-radius: 3px;
-            -webkit-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
-            -moz-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
-            box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
-        }
-
-        .board {
-            border-radius: 3px;
-            -webkit-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
-            -moz-box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
-            box-shadow: 3px 3px 17px 2px rgba(0,0,0,0.47);
-            margin-bottom: 10px;
-        }
-
-        .board .media-body {
-            padding-top: 5px;
-        }
-
-        #cards .card p {
-            margin: 10px;
-        }
-    </style>
-
 
     <!-- Scripts -->
     <script>

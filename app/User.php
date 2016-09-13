@@ -37,6 +37,10 @@ class User extends Authenticatable
 		return $this->hasMany("App\Board");
 	}
 
+    public function pins() {
+        return $this->hasManyThrough('App\Pin', 'App\Board');
+    }
+
 	public function pinterestLoggedIn() {
 		if ($this->pinterestaccesstoken) {
 			return true;

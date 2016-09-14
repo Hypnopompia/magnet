@@ -38,8 +38,4 @@ class Pinterest {
 	public function getRateLimit() {
 		return $this->pinterest->getRateLimit();
 	}
-
-	public function __get($property) {
-		return $this->pinterest->$name;
-	}
 }

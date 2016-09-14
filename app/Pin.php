@@ -19,7 +19,7 @@ class Pin extends Model
 		Pin::created(function ($pin) {
 			$workerjob = new Workerjob;
 			// $workerjob->addJob('ResolvePinLink', ['pin_id' => $pin->id]);
-			$workerjob->send();
+			// $workerjob->send();
 		});
 	}
 

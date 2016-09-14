@@ -26,6 +26,8 @@ class Workerjob {
 	}
 
 	public function send() {
+		return;
+
 		$sqs = AWS::createClient('sqs');
 		if (is_array($this->entries) && count($this->entries) > 0) {
 			$result = $sqs->sendMessageBatch([

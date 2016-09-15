@@ -102,7 +102,7 @@
         },
 
         _setCols: function () {
-            var diff;
+            var diff, w;
 
             // calculate columns
             this.cols = Math.floor(this.box.width() / this.options.width);

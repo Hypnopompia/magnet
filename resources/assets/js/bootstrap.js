@@ -8,7 +8,7 @@ window._ = require('lodash');
  */
 
 window.$ = window.jQuery = require('jquery');
-require('grid-a-licious');
+require('./jquery.grid-a-licious.js');
 
 require('bootstrap-sass');
 

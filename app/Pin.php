@@ -4,7 +4,6 @@ namespace App;
 
 use AWS;
 use App\Board;
-use App\Magnet\Workerjob;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Image;
@@ -17,9 +16,6 @@ class Pin extends Model
 		parent::boot();
 
 		Pin::created(function ($pin) {
-			$workerjob = new Workerjob;
-			// $workerjob->addJob('ResolvePinLink', ['pin_id' => $pin->id]);
-			// $workerjob->send();
 		});
 	}
 
@@ -80,7 +76,7 @@ class Pin extends Model
 		$pin->save();
 
 		if ($pin && $pin->image == null) {
-			Workerjob::sendJob('DownloadImage', ['pin_id' => $pin->id]);
+			dispatch(new DownloadImage($pin));
 		}
 		return $pin;
 	}

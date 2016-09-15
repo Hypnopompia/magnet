@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Magnet\Workerjob;
+use App\Jobs\ImportBoards;
 use Auth;
 use DirkGroenen\Pinterest\Pinterest;
 use Illuminate\Http\Request;
@@ -26,9 +26,7 @@ class PinterestController extends Controller
         $user->pinterestaccesstoken = $token->access_token;
         $user->save();
 
-        $workerjob = new Workerjob;
-        $workerjob->addJob('ImportBoards', ['user_id' => $user->id]);
-        $workerjob->send();
+        dispatch(new ImportBoards($user));
 
         return redirect("home");
     }

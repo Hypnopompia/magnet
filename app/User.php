@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Board;
-use App\Magnet\Workerjob;
+use App\Jobs\ImportBoards;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Log;
@@ -52,9 +52,7 @@ class User extends Authenticatable
 			$board->delete();
 		}
 
-		$workerjob = new Workerjob;
-		$workerjob->addJob('ImportBoards', ['user_id' => $this->id]);
-		$workerjob->send();
+		dispatch(new ImportBoards($this));
 
 		return $this;
 	}

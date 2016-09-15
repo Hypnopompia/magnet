@@ -65,6 +65,7 @@ class SQSController extends Controller
 				->first();
 
 			if ($board) {
+				// dispatch(new ImportPins($board));
 				$workerjob->addJob('ImportPins', ['board_id' => $board->id]);
 			}
 		}

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Log;
 use App\Pin;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

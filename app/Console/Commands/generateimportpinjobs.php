@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ImportPins;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;

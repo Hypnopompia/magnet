@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         GenerateImportPinJobs::class,
+        GenerateImportBoardJobs::class,
     ];
 
     /**
@@ -25,8 +26,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('command:generateimportboardjobs')->daily();
+        $schedule->command('command:generateimportpinjobs')->cron('*/15 * * * *');
     }
 
     /**

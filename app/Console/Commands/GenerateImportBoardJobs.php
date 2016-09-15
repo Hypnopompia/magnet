@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ImportBoards;
 use App\User;
 use Illuminate\Console\Command;
 

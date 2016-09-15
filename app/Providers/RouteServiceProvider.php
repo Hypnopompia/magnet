@@ -38,8 +38,6 @@ class RouteServiceProvider extends ServiceProvider
         $this->mapWebRoutes();
 
         $this->mapApiRoutes();
-
-        $this->mapSqsRoutes();
     }
 
     /**
@@ -74,23 +72,6 @@ class RouteServiceProvider extends ServiceProvider
             'prefix' => 'api',
         ], function ($router) {
             require base_path('routes/api.php');
-        });
-    }
-
-    /**
-     * Define the "sqs" routes for the application.
-     *
-     * These routes are typically stateless.
-     *
-     * @return void
-     */
-    protected function mapSqsRoutes()
-    {
-        Route::group([
-            'middleware' => 'sqs',
-            'namespace' => $this->namespace,
-        ], function ($router) {
-            require base_path('routes/sqs.php');
         });
     }
 }

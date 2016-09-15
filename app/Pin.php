@@ -4,6 +4,7 @@ namespace App;
 
 use AWS;
 use App\Board;
+use App\Jobs\DownloadImage;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Image;

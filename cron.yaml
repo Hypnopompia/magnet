@@ -1,8 +1,0 @@
-version: 1
-cron:
-  - name: "add-boards-jobs"
-    url: "/sqs.addboardsjobs"
-    schedule: "0 0 * * *"
-  - name: "add-pins-jobs"
-    url: "/sqs.addpinsjobs"
-    schedule: "*/10 * * * *"

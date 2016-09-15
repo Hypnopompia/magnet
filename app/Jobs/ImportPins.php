@@ -31,6 +31,7 @@ class ImportPins implements ShouldQueue
      */
     public function handle()
     {
+        Log::info('importPinsJob', ['board' => $this->board]);
         $this->board->importPins();
     }
 }

@@ -31,6 +31,7 @@ class ImportBoards implements ShouldQueue
      */
     public function handle()
     {
+        Log::info('importBoardsJob', ['user' => $this->user]);
         $this->user->importBoards();
     }
 }

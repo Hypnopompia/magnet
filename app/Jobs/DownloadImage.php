@@ -31,6 +31,7 @@ class DownloadImage implements ShouldQueue
      */
     public function handle()
     {
+        Log::info('downloadImageJob', ['ping' => $this->pin]);
         $this->pin->downloadImage();
     }
 }

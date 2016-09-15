@@ -102,6 +102,8 @@
         },
 
         _setCols: function () {
+            var diff;
+
             // calculate columns
             this.cols = Math.floor(this.box.width() / this.options.width);
             //If Cols lower than 1, the grid disappears

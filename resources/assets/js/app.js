@@ -13,8 +13,21 @@ require('./bootstrap');
  * the application, or feel free to tweak this setup for your needs.
  */
 
-Vue.component('example', require('./components/Example.vue'));
+// Vue.component('example', require('./components/Example.vue'));
 
-const app = new Vue({
-    el: 'body'
+// const app = new Vue({
+// 	el: 'body'
+// });
+
+$(document).ready(function () {
+	$("#cards").gridalicious({
+		gutter: 20,
+		selector: '.card',
+		animate: true
+	});
+
+	$(".utcdate").each(function(){
+		var messageLocalTime = moment.utc( $(this).attr('data-utc') ).toDate();
+		$(this).html( moment(messageLocalTime).format( $(this).attr('data-dateformat') ) );
+	});
 });

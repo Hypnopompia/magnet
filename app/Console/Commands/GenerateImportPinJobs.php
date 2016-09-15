@@ -7,7 +7,7 @@ use App\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class generateimportpinjobs extends Command
+class GenerateImportPinJobs extends Command
 {
     /**
      * The name and signature of the console command.

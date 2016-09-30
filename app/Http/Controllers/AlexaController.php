@@ -8,10 +8,10 @@ class AlexaController extends Controller
 {
 	public function __construct()
 	{
-		$this->middleware('auth');
+		$this->middleware('auth:api');
 	}
 
-	public function skill() {
-		return ['foo' => 'bar'];
+	public function skill(Request $request) {
+		return ['foo' => 'bar', 'user' => $request->user()];
 	}
 }

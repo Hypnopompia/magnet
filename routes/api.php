@@ -13,4 +13,4 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/alexa-skill', 'AlexaController@skill')->middleware('auth:api');
+Route::post('/alexa-skill', 'AlexaController@skill')->middleware('auth:api');

@@ -19,4 +19,5 @@ Auth::routes();
 
 Route::get('/pinterest/callback', 'PinterestController@callback');
 Route::get('/home', 'HomeController@index');
+Route::get('/usertokens', 'HomeController@usertokens');
 Route::get('/board/{board}', 'BoardController@index');

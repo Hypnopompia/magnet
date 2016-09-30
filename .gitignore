@@ -7,6 +7,10 @@ Homestead.yaml
 .env
 .env.*
 !.env.example
+storage/oauth-private.key
+storage/oauth-public.key
+
+
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

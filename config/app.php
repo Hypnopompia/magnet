@@ -183,6 +183,8 @@ return [
 
         Magnet\Pinterest\PinterestServiceProvider::class,
 
+        Laravel\Passport\PassportServiceProvider::class,
+
     ],
 
     /*

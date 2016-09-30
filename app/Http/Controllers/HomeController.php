@@ -36,8 +36,10 @@ class HomeController extends Controller
 			'pinterestLoginUrl' => $loginurl,
 			'boards' => $boards,
 		]);
+	}
 
-
+	public function usertokens() {
+		return view('usertokens');
 	}
 
 }

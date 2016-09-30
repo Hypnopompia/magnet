@@ -6,12 +6,13 @@ use App\Board;
 use App\Jobs\ImportBoards;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
 use Log;
 use Pinterest;
 
 class User extends Authenticatable
 {
-	use Notifiable;
+	use Notifiable, HasApiTokens;
 
 	/**
 	 * The attributes that are mass assignable.

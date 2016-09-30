@@ -11,7 +11,38 @@ class AlexaController extends Controller
 		$this->middleware('auth:api');
 	}
 
+// {
+//   "version": "1.0",
+//   "response": {
+//     "outputSpeech": {
+//       "type": "SSML",
+//       "ssml": "<speak> Here's your fact: On Mars, the Sun appears about half the size as it does on Earth. </speak>"
+//     },
+//     "card": {
+//       "content": "On Mars, the Sun appears about half the size as it does on Earth.",
+//       "title": "My Space Facts",
+//       "type": "Simple"
+//     },
+//     "shouldEndSession": true
+//   },
+//   "sessionAttributes": {}
+// }
+
 	public function skill(Request $request) {
-		return ['foo' => 'bar', 'user' => $request->user()];
+		return [
+			'version' => '1.0',
+			'response' => [
+				'outputSpeech' => [
+					'type' => 'SSML',
+					'ssml' => '<speak>Here is a pin.</speak>'
+				],
+				'card' => [
+					'content' => 'Here is your pin.',
+					'title' => 'Magnet Pin',
+					'type' => 'Simple'
+				]
+			],
+			'sessionAttributes' => []
+		];
 	}
 }

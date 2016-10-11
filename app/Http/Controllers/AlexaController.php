@@ -30,8 +30,17 @@ class AlexaController extends Controller
 // }
 
 	public function skill(Request $request) {
-		if ($request->request['session']['application']['applicationId'] != config('magnet.alexaAppId')) {
+		if ($request->session['application']['applicationId'] != config('magnet.alexaAppId')) {
 			return "Invalid applicationId";
+		}
+
+		switch ($request->request['type']) {
+			case 'LaunchRequest':
+				break;
+			case 'IntentRequest':
+				break;
+			case 'SessionEndedRequest':
+				break;
 		}
 
 		return [

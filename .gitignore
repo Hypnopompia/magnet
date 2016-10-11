@@ -9,7 +9,7 @@ Homestead.yaml
 !.env.example
 storage/oauth-private.key
 storage/oauth-public.key
-
+token
 
 
 # Elastic Beanstalk Files

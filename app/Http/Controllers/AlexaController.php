@@ -8,7 +8,7 @@ class AlexaController extends Controller
 {
 	public function __construct()
 	{
-		$this->middleware(['auth:api','log.requests']);
+		$this->middleware(['log.requests']);
 		// $this->middleware('auth:api');
 	}
 
@@ -30,6 +30,8 @@ class AlexaController extends Controller
 // }
 
 	public function skill(Request $request) {
+		// https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/handling-requests-sent-by-alexa
+
 		if ($request->session['application']['applicationId'] != config('magnet.alexaAppId')) {
 			return "Invalid applicationId";
 		}

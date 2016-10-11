@@ -18,7 +18,7 @@ class LogAfterRequest {
 		Log::info('app.requests', [
 			'url' => $request->fullUrl(),
 			'method' => $request->method(),
-			'requestHeaders' => Request::all(),
+			'AuthHeader' => Request::header('Authorization'),
 			'request' => $request->all(),
 			'response' => $response
 		]);

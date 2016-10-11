@@ -8,7 +8,7 @@ class AlexaController extends Controller
 {
 	public function __construct()
 	{
-		$this->middleware('log.requests');
+		$this->middleware('auth:api,log.requests');
 		// $this->middleware('auth:api');
 	}
 

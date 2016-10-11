@@ -30,6 +30,10 @@ class AlexaController extends Controller
 // }
 
 	public function skill(Request $request) {
+		if ($request->request['session']['application']['applicationId'] != config('magnet.alexaAppId')) {
+			return "Invalid applicationId";
+		}
+
 		return [
 			'version' => '1.0',
 			'response' => [

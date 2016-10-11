@@ -36,7 +36,7 @@ class AlexaController extends Controller
 			return "Invalid applicationId";
 		}
 
-		switch ($request->request['type']) {
+		switch ($request->request->type) {
 			case 'LaunchRequest':
 				break;
 			case 'IntentRequest':

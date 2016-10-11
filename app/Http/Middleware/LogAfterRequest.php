@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Request;
 use Illuminate\Support\Facades\Log;
 
 class LogAfterRequest {
@@ -17,6 +18,7 @@ class LogAfterRequest {
 		Log::info('app.requests', [
 			'url' => $request->fullUrl(),
 			'method' => $request->method(),
+			'requestHeaders' => Request::all(),
 			'request' => $request->all(),
 			'response' => $response
 		]);

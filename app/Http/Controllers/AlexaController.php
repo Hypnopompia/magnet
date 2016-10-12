@@ -34,37 +34,37 @@ class AlexaController extends Controller
 //   "sessionAttributes": {}
 // }
 
-    private function isAccessTokenRevoked($tokenId) {
-        return DB::table('oauth_access_tokens')
-                    ->where('id', $tokenId)->where('revoked', 1)->exists();
-    }
+	private function isAccessTokenRevoked($tokenId) {
+		return DB::table('oauth_access_tokens')
+					->where('id', $tokenId)->where('revoked', 1)->exists();
+	}
 
 	private function validateToken($jwt) {
 		$token = (new Parser())->parse($jwt);
 
-        if ($token->verify(new Sha256(), file_get_contents(Passport::keyPath('oauth-public.key'))) === false) {
-            // throw OAuthServerException::accessDenied('Access token could not be verified');
-            return false;
-        }
+		if ($token->verify(new Sha256(), file_get_contents(Passport::keyPath('oauth-public.key'))) === false) {
+			// throw OAuthServerException::accessDenied('Access token could not be verified');
+			return false;
+		}
 
-        // Ensure access token hasn't expired
-        $data = new ValidationData();
-        $data->setCurrentTime(time());
+		// Ensure access token hasn't expired
+		$data = new ValidationData();
+		$data->setCurrentTime(time());
 
-        if ($token->validate($data) === false) {
-            // throw OAuthServerException::accessDenied('Access token is invalid');
-            return false;
-        }
+		if ($token->validate($data) === false) {
+			// throw OAuthServerException::accessDenied('Access token is invalid');
+			return false;
+		}
 
-        // Check if token has been revoked
-        if ($this->isAccessTokenRevoked($token->getClaim('jti'))) {
-            // throw OAuthServerException::accessDenied('Access token has been revoked');
-            return false;
-        }
+		// Check if token has been revoked
+		if ($this->isAccessTokenRevoked($token->getClaim('jti'))) {
+			// throw OAuthServerException::accessDenied('Access token has been revoked');
+			return false;
+		}
 
-        return [
-        	'user_id' => $token->getClaim('sub')
-        ];
+		return [
+			'user_id' => $token->getClaim('sub')
+		];
 	}
 
 	public function skill(Request $request) {

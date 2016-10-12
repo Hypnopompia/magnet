@@ -1,4 +1,4 @@
-HOST=https://magnet.havocstudios.com
+HOST=http://magnet.local
 TOKEN=`cat token`
 
 curl -s \
